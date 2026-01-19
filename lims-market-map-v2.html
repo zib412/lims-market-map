@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratory Software Market Map v2</title>
+    <link rel="stylesheet" href="lims-market-map-v2.css">
+</head>
+<body>
+    <div class="header">
+        <h1>Laboratory Software Market Map <span class="version-badge">v2</span></h1>
+        <p class="subtitle">Independent Testing, Inspection & Certification (TIC) Labs</p>
+
+        <!-- How to Read This Map -->
+        <div class="map-guide">
+            <h3>📖 How to Read This Map</h3>
+            <ul>
+                <li><strong>Horizontal axis:</strong> Work flows left → right as samples move through the lab</li>
+                <li><strong>Vertical axis:</strong> Funding stage (bottom = early, top = mature/IPO)</li>
+                <li><strong>Gray row:</strong> Shows current manual processes (the "before" state)</li>
+                <li><strong>Empty cells:</strong> Whitespace opportunities</li>
+                <li><strong>Company URLs:</strong> Click company names to visit their websites</li>
+            </ul>
+            <h3>🔬 Market Context</h3>
+            <ul>
+                <li>Most labs still rely on Excel/paper for critical workflows (see gray row)</li>
+                <li>PE roll-ups creating demand for unified cloud platforms</li>
+                <li>Regulatory surge (PFAS, FSMA) forcing labs to modernize or fail</li>
+            </ul>
+        </div>
+
+        <div class="controls">
+            <button id="addCompanyBtn" class="primary-btn">+ Add Company</button>
+            <button id="exportPdfBtn" class="primary-btn">📄 Export as PDF</button>
+            <button id="toggleInsightsBtn" class="primary-btn">💡 Insights</button>
+            <button id="clearAllBtn" class="secondary-btn">Clear All</button>
+            <span id="companyCount" class="count">Loading...</span>
+        </div>
+    </div>
+
+    <!-- Market Insights Panel -->
+    <div id="insightsPanel" class="insights-panel">
+        <div class="insights-header">
+            <h2>Market Insights</h2>
+            <button id="closeInsightsBtn" class="close-btn">×</button>
+        </div>
+        <div class="insights-content">
+            <div class="insight-card">
+                <h3>🔥 Workflow Coverage</h3>
+                <div id="workflowCoverage"></div>
+            </div>
+            <div class="insight-card">
+                <h3>💰 Funding Concentration</h3>
+                <div id="fundingConcentration"></div>
+            </div>
+            <div class="insight-card">
+                <h3>🎯 Whitespace Opportunities</h3>
+                <div id="whitespaceOpps"></div>
+            </div>
+            <div class="insight-card">
+                <h3>📊 Market Maturity Analysis</h3>
+                <div id="maturityAnalysis"></div>
+            </div>
+            <div class="insight-card">
+                <h3>🚀 Competitive Intensity</h3>
+                <div id="competitiveIntensity"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="map-container">
+        <div class="axis-label y-axis-label">Funding Stage</div>
+        <div class="axis-label x-axis-label">Lab Workflow</div>
+
+        <div class="grid-wrapper">
+            <!-- Y-axis labels -->
+            <div class="y-labels">
+                <div class="y-label legacy-label">Legacy/Manual</div>
+                <div class="y-label">Seed/Early</div>
+                <div class="y-label">Series A-B</div>
+                <div class="y-label">Series C+</div>
+                <div class="y-label">Public/Mature</div>
+            </div>
+
+            <!-- X-axis labels -->
+            <div class="x-labels">
+                <div class="x-label">Sample Intake & Accessioning</div>
+                <div class="x-label">Bench Work & Analysis</div>
+                <div class="x-label">QA/QC Review</div>
+                <div class="x-label">Reporting & COA</div>
+                <div class="x-label">Invoicing & Delivery</div>
+            </div>
+
+            <!-- Grid -->
+            <div class="grid" id="gridContainer"></div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Company Modal -->
+    <div id="companyModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="modalTitle">Add New Company</h2>
+            <form id="companyForm">
+                <input type="hidden" id="companyId">
+
+                <label for="companyName">Company Name *</label>
+                <input type="text" id="companyName" required>
+
+                <label for="companyUrl">Company URL *</label>
+                <input type="text" id="companyUrl" placeholder="e.g., https://qbench.com" required>
+
+                <label for="website">Website Domain (for logo)</label>
+                <input type="text" id="website" placeholder="e.g., qbench.com">
+
+                <label for="workflow">Primary Workflow *</label>
+                <select id="workflow" required>
+                    <option value="">Select workflow...</option>
+                    <option value="Sample Intake & Accessioning">Sample Intake & Accessioning</option>
+                    <option value="Bench Work & Analysis">Bench Work & Analysis</option>
+                    <option value="QA/QC Review">QA/QC Review</option>
+                    <option value="Reporting & COA">Reporting & COA</option>
+                    <option value="Invoicing & Delivery">Invoicing & Delivery</option>
+                </select>
+
+                <label for="fundingStage">Funding Stage *</label>
+                <select id="fundingStage" required>
+                    <option value="">Select stage...</option>
+                    <option value="Seed/Early">Seed/Early</option>
+                    <option value="Series A-B">Series A-B</option>
+                    <option value="Series C+">Series C+</option>
+                    <option value="Public/Mature">Public/Mature</option>
+                </select>
+
+                <label for="description">One-line Description *</label>
+                <input type="text" id="description" placeholder="What they do in <15 words" required>
+
+                <label for="differentiator">Key Differentiator</label>
+                <input type="text" id="differentiator" placeholder="e.g., UX-first, Instrument integration">
+
+                <label for="valuation">Valuation/Notes</label>
+                <input type="text" id="valuation" placeholder="e.g., $50M Series B, Bootstrapped">
+
+                <label for="investors">Notable Investors</label>
+                <input type="text" id="investors" placeholder="e.g., Y Combinator, Bessemer">
+
+                <div class="form-buttons">
+                    <button type="submit" class="primary-btn">Save Company</button>
+                    <button type="button" id="cancelBtn" class="secondary-btn">Cancel</button>
+                    <button type="button" id="deleteBtn" class="delete-btn" style="display:none;">Delete</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="lims-market-map-v2.js"></script>
+</body>
+</html>
